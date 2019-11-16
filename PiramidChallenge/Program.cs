@@ -13,8 +13,6 @@ namespace PiramidChallenge
 
 		static void Main(string[] args)
 		{
-			//var data = GetTestData();
-
 			var data = GetDataFromFile();
 			Search(data, 0, 0);
 
@@ -32,10 +30,12 @@ namespace PiramidChallenge
 				path.Add(GetNode(data, yIndex, xIndex).Value);
 			}
 
-
-			var node = GetNode(data, yIndex, xIndex);
-
-			//Console.Write(GetNode(data, yIndex, xIndex).Value + ">");
+			//var temp = string.Empty;
+			//foreach (var value in path)
+			//{
+			//	temp += value + ">";
+			//}
+			//Console.WriteLine(temp);
 
 			if (GetNode(data, yIndex, xIndex).IsLeaf)
 			{
@@ -47,7 +47,7 @@ namespace PiramidChallenge
 					stringPath += value + ">";
 				}
 
-				//Console.WriteLine(stringPath);
+				//Console.WriteLine(stringPath + " " + result);
 
 				if(result > resultValue)
 				{
@@ -91,13 +91,6 @@ namespace PiramidChallenge
 					path.RemoveAt(path.Count - 1);
 				}
 
-				//var p = "";
-				//foreach (var value in path)
-				//{
-				//	p += value + ">";
-				//}
-				//Console.WriteLine(p);
-
 				Search(data, GetNode(data, yIndex, xIndex).Parent.yIndex, GetNode(data, yIndex, xIndex).Parent.xIndex);
 			}
 
@@ -135,7 +128,7 @@ namespace PiramidChallenge
 			else if (GetNode(data, yIndex, xIndex).IsOdd)
 			{
 				return GetNode(data, yIndex, xIndex).IsLeaf == false &&
-						GetRightChild(data, yIndex, xIndex).IsEvent &&
+					   GetRightChild(data, yIndex, xIndex).IsEvent &&
 					   GetRightChild(data, yIndex, xIndex).VisitedByLeftParent == false;
 			}
 			else
@@ -151,7 +144,6 @@ namespace PiramidChallenge
 
 		public static Node GetBottomChild(List<List<Node>> data, int yIndex, int xIndex)
 		{
-			var node = data[yIndex + 1][xIndex];
 			return data[yIndex + 1][xIndex];
 		}
 
@@ -163,7 +155,6 @@ namespace PiramidChallenge
 
 		public static void SetParent(Node node, int yIndex, int xIndex, bool visitedByTopNode, bool visistedByLeftNode)
 		{
-			var val = node.Value;
 			node.Parent.yIndex = yIndex;
 			node.Parent.xIndex = xIndex;
 			node.VisitedByTopParent = visitedByTopNode;
@@ -174,7 +165,7 @@ namespace PiramidChallenge
 		{
 			var data = new List<List<Node>>();
 
-			string[] lines = File.ReadAllLines(@"..\..\TestData.txt");
+			string[] lines = File.ReadAllLines(@"..\..\Data.txt");
 
 			for(int i = 0; i < lines.Length; i++)
 			{
