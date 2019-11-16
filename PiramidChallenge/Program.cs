@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace PiramidChallenge
 {
@@ -12,7 +13,9 @@ namespace PiramidChallenge
 
 		static void Main(string[] args)
 		{
-			var data = GetData();
+			//var data = GetTestData();
+
+			var data = GetDataFromFile();
 			Search(data, 0, 0);
 
 			Console.WriteLine("Result Value: " + resultValue);
@@ -23,10 +26,19 @@ namespace PiramidChallenge
 
 		public static bool Search(List<List<Node>> data, int yIndex, int xIndex)
 		{
-			if(GetNode(data, yIndex, xIndex).IsLeaf)
+			if(GetNode(data, yIndex, xIndex).IsRoot && GetNode(data, yIndex, xIndex).AddedToPath == false)
 			{
+				GetNode(data, yIndex, xIndex).AddedToPath = true;
 				path.Add(GetNode(data, yIndex, xIndex).Value);
+			}
 
+
+			var node = GetNode(data, yIndex, xIndex);
+
+			//Console.Write(GetNode(data, yIndex, xIndex).Value + ">");
+
+			if (GetNode(data, yIndex, xIndex).IsLeaf)
+			{
 				string stringPath = string.Empty;
 				int result = 0;
 				foreach (var value in path)
@@ -34,7 +46,9 @@ namespace PiramidChallenge
 					result += value;
 					stringPath += value + ">";
 				}
-				
+
+				//Console.WriteLine(stringPath);
+
 				if(result > resultValue)
 				{
 					resultValue = result;
@@ -43,17 +57,16 @@ namespace PiramidChallenge
 
 				path.RemoveAt(path.Count - 1);
 
-				Search(data, GetNode(data, yIndex, xIndex).Parent.yIndex, GetNode(data, yIndex, xIndex).Parent.xIndex);
+				var parentYIndex = GetNode(data, yIndex, xIndex).Parent.yIndex;
+				var parentXIndex = GetNode(data, yIndex, xIndex).Parent.xIndex;
+
+				Search(data, parentYIndex, parentXIndex);
 			}
 			
 			if(CanMoveDown(data, yIndex, xIndex))
-			{	
+			{
 				SetParent(GetNode(data, yIndex + 1, xIndex), yIndex, xIndex, true, false);
-				if(GetNode(data, yIndex, xIndex).AddedToPath == false)
-				{
-					GetNode(data, yIndex, xIndex).AddedToPath = true;
-					path.Add(GetNode(data, yIndex, xIndex).Value);
-				}				
+				path.Add(GetBottomChild(data, yIndex, xIndex).Value);
 
 				yIndex++;
 				Search(data, yIndex, xIndex);
@@ -62,11 +75,7 @@ namespace PiramidChallenge
 			if(CanMoveRight(data, yIndex, xIndex))
 			{
 				SetParent(GetNode(data, yIndex + 1, xIndex + 1), yIndex, xIndex, false, true);
-				if (GetNode(data, yIndex, xIndex).AddedToPath == false)
-				{
-					GetNode(data, yIndex, xIndex).AddedToPath = true;
-					path.Add(GetNode(data, yIndex, xIndex).Value);
-				}
+				path.Add(GetRightChild(data, yIndex, xIndex).Value);
 
 				yIndex++;
 				xIndex++;
@@ -76,12 +85,19 @@ namespace PiramidChallenge
 			if (GetNode(data, yIndex, xIndex).IsRoot == false &&
 				CanMoveDown(data, yIndex, xIndex) == false &&
 				CanMoveRight(data, yIndex, xIndex) == false)
-			{		
-				if(path.Count != 1)
+			{
+				if (path.Count != 0)
 				{
 					path.RemoveAt(path.Count - 1);
 				}
-				
+
+				//var p = "";
+				//foreach (var value in path)
+				//{
+				//	p += value + ">";
+				//}
+				//Console.WriteLine(p);
+
 				Search(data, GetNode(data, yIndex, xIndex).Parent.yIndex, GetNode(data, yIndex, xIndex).Parent.xIndex);
 			}
 
@@ -89,9 +105,8 @@ namespace PiramidChallenge
 		}
 
 		public static bool CanMoveDown(List<List<Node>> data, int yIndex, int xIndex)
-		{	
-			//assume data node is not leaf
-			if(GetNode(data, yIndex, xIndex).IsEvent)
+		{
+			if (GetNode(data, yIndex, xIndex).IsEvent)
 			{
 				return GetNode(data, yIndex, xIndex).IsLeaf == false &&
 					   GetBottomChild(data, yIndex, xIndex).IsOdd &&
@@ -136,27 +151,55 @@ namespace PiramidChallenge
 
 		public static Node GetBottomChild(List<List<Node>> data, int yIndex, int xIndex)
 		{
-			yIndex++;
-			
-			return data[yIndex][xIndex];
+			var node = data[yIndex + 1][xIndex];
+			return data[yIndex + 1][xIndex];
 		}
 
 		public static Node GetRightChild(List<List<Node>> data, int yIndex, int xIndex)
 		{
-			yIndex++;
-			xIndex++;
-			return data[yIndex][xIndex];
+			var node = data[yIndex + 1][xIndex + 1];
+			return data[yIndex + 1][xIndex + 1];
 		}
 
 		public static void SetParent(Node node, int yIndex, int xIndex, bool visitedByTopNode, bool visistedByLeftNode)
 		{
+			var val = node.Value;
 			node.Parent.yIndex = yIndex;
 			node.Parent.xIndex = xIndex;
 			node.VisitedByTopParent = visitedByTopNode;
 			node.VisitedByLeftParent = visistedByLeftNode;
 		}
+		
+		public static List<List<Node>> GetDataFromFile()
+		{
+			var data = new List<List<Node>>();
 
-		public static List<List<Node>> GetData()
+			string[] lines = File.ReadAllLines(@"..\..\TestData.txt");
+
+			for(int i = 0; i < lines.Length; i++)
+			{
+				var row = new List<Node>();
+				var values = lines[i].Split(' ');
+				for(int j = 0; j < values.Length; j++)
+				{
+					var node = new Node
+					{
+						Value = int.Parse(values[j]),
+						IsLeaf = (i + 1) == lines.Length,
+						IsEvent = int.Parse(values[j]) % 2 == 0,
+						IsOdd = int.Parse(values[j]) % 2 != 0,
+						IsRoot = i == 0,
+						Parent = new Parent()
+					};
+					row.Add(node);
+				}
+				data.Add(row);
+			}
+
+			return data;
+		}
+
+		public static List<List<Node>> GetTestData()
 		{
 			var data = new List<List<Node>>();
 
@@ -294,10 +337,11 @@ namespace PiramidChallenge
 
 	public class Parent
 	{
-		public int xIndex { get; set; } = 0; //x = position of parent on the x-axis: stores -1 or 0 unless node index in array is 0 then 0
+		public int xIndex { get; set; } = 0; 
 
-		public int yIndex { get; set; } = 0;  // y = position of parent on the y-axis: current position - 1
+		public int yIndex { get; set; } = 0;
 	}          
+
 }
 
  
