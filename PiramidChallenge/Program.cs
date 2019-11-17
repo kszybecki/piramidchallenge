@@ -24,7 +24,7 @@ namespace PiramidChallenge
 
 		public static bool Search(List<List<Node>> data, int yIndex, int xIndex)
 		{
-			if(GetNode(data, yIndex, xIndex).IsRoot && GetNode(data, yIndex, xIndex).AddedToPath == false)
+			if (GetNode(data, yIndex, xIndex).IsRoot && GetNode(data, yIndex, xIndex).AddedToPath == false)
 			{
 				GetNode(data, yIndex, xIndex).AddedToPath = true;
 				path.Add(GetNode(data, yIndex, xIndex).Value);
@@ -61,28 +61,26 @@ namespace PiramidChallenge
 				var parentXIndex = GetNode(data, yIndex, xIndex).Parent.xIndex;
 
 				Search(data, parentYIndex, parentXIndex);
-			}
-			
-			if(CanMoveDown(data, yIndex, xIndex))
-			{
+			} 
+			else if(CanMoveDown(data, yIndex, xIndex))
+			{	
 				SetParent(GetNode(data, yIndex + 1, xIndex), yIndex, xIndex, true, false);
 				path.Add(GetBottomChild(data, yIndex, xIndex).Value);
 
-				yIndex++;
+				yIndex = yIndex + 1;
 				Search(data, yIndex, xIndex);
-			}
-
-			if(CanMoveRight(data, yIndex, xIndex))
+			} 
+			else if(CanMoveRight(data, yIndex, xIndex))
 			{
 				SetParent(GetNode(data, yIndex + 1, xIndex + 1), yIndex, xIndex, false, true);
 				path.Add(GetRightChild(data, yIndex, xIndex).Value);
 
-				yIndex++;
-				xIndex++;
+				yIndex = yIndex + 1;
+				xIndex = xIndex + 1;
 				Search(data, yIndex, xIndex);
 			}
 
-			if (GetNode(data, yIndex, xIndex).IsRoot == false &&
+			else if (GetNode(data, yIndex, xIndex).IsRoot == false &&
 				CanMoveDown(data, yIndex, xIndex) == false &&
 				CanMoveRight(data, yIndex, xIndex) == false)
 			{
@@ -91,7 +89,14 @@ namespace PiramidChallenge
 					path.RemoveAt(path.Count - 1);
 				}
 
+				GetBottomChild(data, yIndex, xIndex).VisitedByTopParent = false;
+				GetRightChild(data, yIndex, xIndex).VisitedByLeftParent = false;
+
 				Search(data, GetNode(data, yIndex, xIndex).Parent.yIndex, GetNode(data, yIndex, xIndex).Parent.xIndex);
+			}
+			else
+			{
+				return true;
 			}
 
 			return true;
@@ -99,42 +104,42 @@ namespace PiramidChallenge
 
 		public static bool CanMoveDown(List<List<Node>> data, int yIndex, int xIndex)
 		{
+			bool result = false;
+
 			if (GetNode(data, yIndex, xIndex).IsEvent)
 			{
-				return GetNode(data, yIndex, xIndex).IsLeaf == false &&
+				result = GetNode(data, yIndex, xIndex).IsLeaf == false &&
 					   GetBottomChild(data, yIndex, xIndex).IsOdd &&
 					   GetBottomChild(data, yIndex, xIndex).VisitedByTopParent == false;
 			}
 			else if (GetNode(data, yIndex, xIndex).IsOdd)
 			{
-				return GetNode(data, yIndex, xIndex).IsLeaf == false &&
+				result =  GetNode(data, yIndex, xIndex).IsLeaf == false &&
 					   GetBottomChild(data, yIndex, xIndex).IsEvent &&
 					   GetBottomChild(data, yIndex, xIndex).VisitedByTopParent == false;
 			}
-			else
-			{
-				return false;
-			}				   
+
+			return result;
 		}
 
 		public static bool CanMoveRight(List<List<Node>> data, int yIndex, int xIndex)
 		{
+			bool result = false;
+
 			if (GetNode(data, yIndex, xIndex).IsEvent)
 			{
-				return GetNode(data, yIndex, xIndex).IsLeaf == false &&
+				result = GetNode(data, yIndex, xIndex).IsLeaf == false &&
 					   GetRightChild(data, yIndex, xIndex).IsOdd &&
 					   GetRightChild(data, yIndex, xIndex).VisitedByLeftParent == false;
 			}
 			else if (GetNode(data, yIndex, xIndex).IsOdd)
 			{
-				return GetNode(data, yIndex, xIndex).IsLeaf == false &&
+				result = GetNode(data, yIndex, xIndex).IsLeaf == false &&
 					   GetRightChild(data, yIndex, xIndex).IsEvent &&
 					   GetRightChild(data, yIndex, xIndex).VisitedByLeftParent == false;
 			}
-			else
-			{
-				return false;
-			}
+
+			return result;
 		}
 
 		public static Node GetNode(List<List<Node>> data, int yIndex, int xIndex)
@@ -149,7 +154,6 @@ namespace PiramidChallenge
 
 		public static Node GetRightChild(List<List<Node>> data, int yIndex, int xIndex)
 		{
-			var node = data[yIndex + 1][xIndex + 1];
 			return data[yIndex + 1][xIndex + 1];
 		}
 
