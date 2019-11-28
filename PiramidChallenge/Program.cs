@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PiramidChallenge
 {
@@ -14,11 +15,11 @@ namespace PiramidChallenge
 		static void Main(string[] args)
 		{
 			var data = GetDataFromFile();
+
 			Search(data, 0, 0);
 
 			Console.WriteLine("Result Value: " + resultValue);
 			Console.WriteLine("Result Path: " + resultPath);
-
 			Console.ReadLine();
 		}
 
@@ -30,29 +31,13 @@ namespace PiramidChallenge
 				path.Add(GetNode(data, yIndex, xIndex).Value);
 			}
 
-			//var temp = string.Empty;
-			//foreach (var value in path)
-			//{
-			//	temp += value + ">";
-			//}
-			//Console.WriteLine(temp);
-
 			if (GetNode(data, yIndex, xIndex).IsLeaf)
-			{
-				string stringPath = string.Empty;
-				int result = 0;
-				foreach (var value in path)
-				{
-					result += value;
-					stringPath += value + ">";
-				}
-
-				//Console.WriteLine(stringPath + " " + result);
-
+			{	
+				int result = path.Sum();
 				if(result > resultValue)
 				{
 					resultValue = result;
-					resultPath = stringPath;
+					resultPath = string.Join(">", path); 
 				}
 
 				path.RemoveAt(path.Count - 1);
@@ -93,10 +78,6 @@ namespace PiramidChallenge
 				GetRightChild(data, yIndex, xIndex).VisitedByLeftParent = false;
 
 				Search(data, GetNode(data, yIndex, xIndex).Parent.yIndex, GetNode(data, yIndex, xIndex).Parent.xIndex);
-			}
-			else
-			{
-				return true;
 			}
 
 			return true;
@@ -190,119 +171,6 @@ namespace PiramidChallenge
 				}
 				data.Add(row);
 			}
-
-			return data;
-		}
-
-		public static List<List<Node>> GetTestData()
-		{
-			var data = new List<List<Node>>();
-
-			var row0 = new List<Node>();
-			var node0 = new Node
-			{
-				Value = 1,
-				IsLeaf = false,
-				IsEvent = false,
-				IsOdd = true,
-				IsRoot = true,
-				Parent = new Parent()
-			};
-			row0.Add(node0);
-			data.Add(row0);
-
-			var row1 = new List<Node>();
-			var node10 = new Node
-			{
-				Value = 8,
-				IsLeaf = false,
-				IsEvent = true,
-				IsOdd = false,
-				Parent = new Parent()
-			};
-			row1.Add(node10);
-			var node11 = new Node
-			{
-				Value = 9,
-				IsLeaf = false,
-				IsEvent = true,
-				IsOdd = false,
-				Parent = new Parent()
-			};
-			row1.Add(node11);
-			data.Add(row1);
-
-			var row2 = new List<Node>();
-			var node20 = new Node
-			{
-				Value = 1,
-				IsLeaf = false,
-				IsEvent = false,
-				IsOdd = true,
-				Parent = new Parent()
-			};
-			row2.Add(node20);
-			var node21 = new Node
-			{
-				Value = 5,
-				IsLeaf = false,
-				IsEvent = false,
-				IsOdd = true,
-				Parent = new Parent()
-			};
-			row2.Add(node21);
-			var node23 = new Node
-			{
-				Value = 9,
-				IsLeaf = false,
-				IsEvent = true,
-				IsOdd = false,
-				Parent = new Parent()
-			};
-			row2.Add(node23);
-			data.Add(row2);
-			
-			var row3 = new List<Node>();
-			var node30 = new Node
-			{
-				Value = 4,
-				IsLeaf = true,
-				IsEvent = true,
-				IsOdd = false,
-				Parent = new Parent()
-			};
-			row3.Add(node30);
-
-			var node31 = new Node
-			{
-				Value = 5,
-				IsLeaf = true,
-				IsEvent = false,
-				IsOdd = true,
-				Parent = new Parent()
-			};
-			row3.Add(node31);
-
-			var node32 = new Node
-			{
-				Value = 2,
-				IsLeaf = true,
-				IsEvent = true,
-				IsOdd = false,
-				Parent = new Parent()
-			};
-			row3.Add(node32);
-
-			var node33 = new Node
-			{
-				Value = 3,
-				IsLeaf = true,
-				IsEvent = false,
-				IsOdd = true,
-				Parent = new Parent()
-			};
-			row3.Add(node33);
-			data.Add(row3);
 
 			return data;
 		}
